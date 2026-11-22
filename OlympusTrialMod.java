@@ -1,3 +1,5 @@
+package com.cybermod.olympustrial;
+
 import java.util.List;
 import org.joml.Vector3f;
 
@@ -30,11 +32,9 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -202,7 +202,6 @@ public class OlympusTrialMod {
         );
     }
 
-    // رسم سلسلة ثلاثية الأبعاد من الجزيئات النارية والحديدية بين نقطتين في الفضاء
     private static void draw3DChain(ServerLevel level, Vec3 from, Vec3 to, DustParticleOptions dust) {
         double dist = from.distanceTo(to);
         int steps = Math.max(8, (int) (dist * 5));
@@ -245,7 +244,6 @@ public class OlympusTrialMod {
             syncHud(player);
         }
 
-        // ميزة السيفين (Dual Wielding): إظهار النصل الثاني في اليد اليسرى تلقائياً عند مسك نصل أثينا!
         @SubscribeEvent
         public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
             if (event.phase != TickEvent.Phase.END) return;
@@ -277,7 +275,6 @@ public class OlympusTrialMod {
             }
         }
 
-        // تحديث الأعداء المتحجرين بواسطة رأس ميدوسا (إحاطتهم بجزيئات الحجر وتجميدهم)
         @SubscribeEvent
         public static void onLevelTick(TickEvent.LevelTickEvent event) {
             if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel serverLevel)) return;
@@ -302,7 +299,6 @@ public class OlympusTrialMod {
             }
         }
 
-        // تفتيت وتكسير التمثال الحجري فوراً عند ضربه بأي سلاح!
         @SubscribeEvent
         public static void onLivingHurt(LivingHurtEvent event) {
             LivingEntity target = event.getEntity();
@@ -323,7 +319,6 @@ public class OlympusTrialMod {
             }
         }
 
-        // جمع الكرات الحمراء (Red Orbs) عند قتل الأعداء مثل لعبة God of War 2
         @SubscribeEvent
         public static void onLivingDeath(LivingDeathEvent event) {
             if (event.getSource().getEntity() instanceof Player player && !player.level().isClientSide) {
@@ -337,7 +332,6 @@ public class OlympusTrialMod {
         }
     }
 
-    // ================= سلاح كريتوس: BLADES OF ATHENA 3D =================
     public static class BladesItem extends SwordItem {
         public BladesItem() {
             super(Tiers.NETHERITE, 9, -1.6F, new Item.Properties().rarity(Rarity.EPIC).fireResistant());
@@ -350,7 +344,6 @@ public class OlympusTrialMod {
             tooltip.add(Component.literal("§c• كليك يمين: إعصار سلاسل أثينا + انفجار Plume of Prometheus"));
         }
 
-        // عند ضرب العدو: رسم سلاسل نارية ثلاثية الأبعاد وسحبه نحو كريتوس
         @Override
         public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
             if (!attacker.level().isClientSide && attacker.level() instanceof ServerLevel serverLevel) {
@@ -366,7 +359,6 @@ public class OlympusTrialMod {
             return super.hurtEnemy(stack, target, attacker);
         }
 
-        // كليك يمين: إطلاق السلاسل في دائرة 360 درجة وضربة Plume of Prometheus الأرضية
         @Override
         public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
             ItemStack stack = player.getItemInHand(hand);
@@ -376,7 +368,6 @@ public class OlympusTrialMod {
                 DustParticleOptions fieryChain = new DustParticleOptions(new Vector3f(1.0F, 0.35F, 0.0F), 1.6F);
                 Vec3 origin = player.position().add(0, 1.1, 0);
 
-                // رسم 12 سلسلة نارية ثلاثية الأبعاد تدور حول كريتوس
                 for (int angle = 0; angle < 360; angle += 30) {
                     double rad = Math.toRadians(angle);
                     Vec3 tip = origin.add(Math.cos(rad) * 7.5, 0.2, Math.sin(rad) * 7.5);
@@ -400,7 +391,6 @@ public class OlympusTrialMod {
         }
     }
 
-    // ================= قدرات الآلهة والتايتنز (GOD & TITAN POWERS) =================
     public static class PowerItem extends Item {
         private final Power power;
 
@@ -465,7 +455,6 @@ public class OlympusTrialMod {
         }
     }
 
-    // 1. قدرة كرونوس: شبكة برق ثلاثية الأبعاد تربط الأعداء ببعضهم وتصعقهم
     private static void useCronosRage(ServerLevel level, Player player) {
         DustParticleOptions cyanArc = new DustParticleOptions(new Vector3f(0.0F, 0.9F, 1.0F), 1.6F);
         List<LivingEntity> targets = nearbyTargets(player, 14.0);
@@ -487,7 +476,6 @@ public class OlympusTrialMod {
         level.playSound(null, player.blockPosition(), SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, 2.0F, 1.2F);
     }
 
-    // 2. قوس القدر: شعاع سهام ضوئية ثلاثية الأبعاد فائقة السرعة
     private static void useBowOfDestiny(ServerLevel level, Player player) {
         Vec3 start = player.getEyePosition();
         Vec3 look = player.getLookAngle();
@@ -512,22 +500,20 @@ public class OlympusTrialMod {
         level.playSound(null, player.blockPosition(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.5F, 1.4F);
     }
 
-    // 3. رأس ميدوسا: شعاع زمردي يحول الوحوش إلى تماثيل حجرية حقيقية!
     private static void useMedusaGaze(ServerLevel level, Player player) {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
         DustParticleOptions emeraldGaze = new DustParticleOptions(new Vector3f(0.1F, 1.0F, 0.2F), 1.8F);
 
-        // رسم مخروط الشعاع الأخضر أمام رأس ميدوسا
         for (int d = 1; d <= 12; d++) {
             Vec3 center = eye.add(look.scale(d));
             level.sendParticles(emeraldGaze, center.x, center.y, center.z, d * 2, d * 0.15, d * 0.15, d * 0.15, 0.02);
         }
 
         for (LivingEntity target : nearbyTargets(player, 11.0)) {
-            target.getPersistentData().putInt(PETRIFIED_TICKS, 160); // تجميد حجري لمدة 8 ثوانٍ
+            target.getPersistentData().putInt(PETRIFIED_TICKS, 160);
             if (target instanceof Mob mob) {
-                mob.setNoAi(true); // إيقاف حركة وذكاء الوحش تماماً كتمثال!
+                mob.setNoAi(true);
             }
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 160, 10));
             level.sendParticles(
@@ -541,11 +527,9 @@ public class OlympusTrialMod {
         level.playSound(null, player.blockPosition(), SoundEvents.STONE_PLACE, SoundSource.PLAYERS, 2.0F, 0.6F);
     }
 
-    // 4. زلزال أطلس: ثوران صخور وحمم ثلاثية الأبعاد حقيقية من الأرض!
     private static void useAtlasQuake(ServerLevel level, Player player) {
         BlockPos center = player.blockPosition();
 
-        // قذف 16 صخرة بركانية ثلاثية الأبعاد في الهواء حول اللاعب
         for (int angle = 0; angle < 360; angle += 22) {
             double rad = Math.toRadians(angle);
             double rx = player.getX() + Math.cos(rad) * 3.5;
@@ -590,7 +574,6 @@ public class OlympusTrialMod {
         public static int redOrbs = 0;
     }
 
-    // ================= واجهة GOD OF WAR 2 الاحترافية أعلى الشاشة =================
     @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientEvents {
 
@@ -601,7 +584,6 @@ public class OlympusTrialMod {
                 Player player = mc.player;
                 if (player == null || mc.options.hideGui) return;
 
-                // رسم شعار الأوميجا الذهبي Ω خلف الأشرطة
                 graphics.fill(8, 8, 36, 38, 0xDD2A1500);
                 graphics.fill(10, 10, 34, 36, 0xFFFFAA00);
                 graphics.fill(13, 13, 31, 33, 0xFF1A0D00);
@@ -613,17 +595,14 @@ public class OlympusTrialMod {
                 float hpRatio = Math.max(0.0F, Math.min(1.0F, player.getHealth() / player.getMaxHealth()));
                 float mpRatio = Math.max(0.0F, Math.min(1.0F, ClientState.magic / (float) MAX_MAGIC));
 
-                // إطار شريط صحة كريتوس (الأخضر الزمردي مثل God of War 2)
                 graphics.fill(barX - 2, 10, barX + barW + 2, 22, 0xFFAA8800);
                 graphics.fill(barX, 12, barX + barW, 20, 0xCC002200);
                 graphics.fill(barX, 12, barX + (int) (barW * hpRatio), 20, 0xFF11DD44);
 
-                // إطار شريط السحر (الأزرق السماوي)
                 graphics.fill(barX - 2, 25, barX + barW + 2, 37, 0xFFAA8800);
                 graphics.fill(barX, 27, barX + barW, 35, 0xCC001133);
                 graphics.fill(barX, 27, barX + (int) (barW * mpRatio), 35, 0xFF00AAFF);
 
-                // عداد الكرات الحمراء (Red Orbs) أعلى اليمين
                 String orbText = "§c§l● RED ORBS: §f" + ClientState.redOrbs;
                 int orbW = mc.font.width(orbText) + 12;
                 graphics.fill(width - orbW - 12, 10, width - 10, 26, 0xCC330000);
@@ -632,505 +611,3 @@ public class OlympusTrialMod {
         }
     }
 }
-```
-
----
-
-### الخطوة 2: عدّل ملف `.github/workflows/build.yml` (لبناء المجسمات الـ 3D والـ Textures المخصصة)
-افتح ملف `.github/workflows/build.yml` على GitHub، امسح اللي جواه وحط الكود ده بالكامل واضغط **Commit changes**:
-
-```yaml
-name: Build Olympus GOW2 3D Mod
-
-on:
-  push:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Download Forge MDK & Generate 3D Models + Custom Textures
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mkdir forge_build
-          cd forge_build
-
-          curl -fL -o forge-mdk.zip \
-            https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.2.20/forge-1.20.1-47.2.20-mdk.zip
-          unzip -q forge-mdk.zip
-          rm -rf src/main/java/*
-
-          mkdir -p src/main/java/com/cybermod/olympustrial
-          cp ../OlympusTrialMod.java src/main/java/com/cybermod/olympustrial/OlympusTrialMod.java
-
-          sed -i 's/^mod_id=.*/mod_id=olympus_trial/' gradle.properties
-          sed -i 's/^mod_name=.*/mod_name=God of War 2 - 3D Mod/' gradle.properties
-          sed -i 's/^mod_group_id=.*/mod_group_id=com.cybermod.olympustrial/' gradle.properties
-          sed -i 's/^mod_version=.*/mod_version=2.0.0/' gradle.properties
-
-          mkdir -p src/main/resources/assets/olympus_trial/models/item
-          mkdir -p src/main/resources/assets/olympus_trial/textures/item
-          mkdir -p src/main/resources/assets/olympus_trial/lang
-
-          # توليد خامات (Textures) مخصصة عالية الجودة بالبايثون بدلاً من صور ماين كرافت!
-          python3 - << 'PYEOF'
-          import zlib, struct
-
-          def save_png(path, w, h, pixel_fn):
-              raw = bytearray()
-              for y in range(h):
-                  raw.append(0)
-                  for x in range(w):
-                      r, g, b, a = pixel_fn(x, y, w, h)
-                      raw.extend((max(0, min(255, int(r))), max(0, min(255, int(g))), max(0, min(255, int(b))), max(0, min(255, int(a)))))
-              def chunk(tag, data):
-                  return struct.pack("!I", len(data)) + tag + data + struct.pack("!I", zlib.crc32(tag + data) & 0xffffffff)
-              ihdr = struct.pack("!IIBBBBB", w, h, 8, 6, 0, 0, 0)
-              png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(bytes(raw), 9)) + chunk(b"IEND", b"")
-              with open(path, "wb") as f:
-                  f.write(png)
-
-          base = "src/main/resources/assets/olympus_trial/textures/item/"
-
-          # 1. خامة نصل أثينا الناري المتوهج
-          save_png(base + "athena_blade.png", 32, 32, lambda x, y, w, h: (
-              255, 80 + (y * 5) % 170, (x * 8) % 90, 255
-          ) if (x + y) % 5 != 0 else (255, 230, 120, 255))
-
-          # 2. خامة الذهب الإغريقي للمقبض والدرع
-          save_png(base + "greek_gold.png", 32, 32, lambda x, y, w, h: (
-              235 - ((x ^ y) % 40), 175 - ((x ^ y) % 30), 30, 255
-          ))
-
-          # 3. خامة الحديد الأسود للسلاسل
-          save_png(base + "dark_chain.png", 32, 32, lambda x, y, w, h: (
-              70 + (x * y) % 35, 75 + (x * y) % 35, 85 + (x * y) % 35, 255
-          ))
-
-          # 4. خامة حراشف وثعابين ميدوسا الزمردية
-          save_png(base + "medusa_scales.png", 32, 32, lambda x, y, w, h: (
-              25, 160 + ((x * 7 + y * 5) % 85), 55, 255
-          ))
-
-          # 5. خامة عيون ميدوسا المشعة
-          save_png(base + "medusa_glow.png", 32, 32, lambda x, y, w, h: (
-              120, 255, 140, 255
-          ))
-
-          # 6. خامة برق كرونوس الأزرق
-          save_png(base + "cronos_lightning.png", 32, 32, lambda x, y, w, h: (
-              20, 200 + (x * 9) % 55, 255, 255
-          ))
-
-          # 7. خامة صخور وحمم أطلس البركانية
-          save_png(base + "atlas_magma.png", 32, 32, lambda x, y, w, h: (
-              255, 110, 10, 255
-          ) if (x * x + y * y) % 7 == 0 else (65, 50, 50, 255))
-          PYEOF
-
-          # ================= 1. المجسم ثلاثي الأبعاد: BLADES OF ATHENA 3D =================
-          cat > src/main/resources/assets/olympus_trial/models/item/blades_of_athena.json <<'EOF'
-          {
-            "credit": "Custom 3D God of War 2 Model",
-            "textures": {
-              "blade": "olympus_trial:item/athena_blade",
-              "gold": "olympus_trial:item/greek_gold",
-              "chain": "olympus_trial:item/dark_chain",
-              "particle": "olympus_trial:item/athena_blade"
-            },
-            "elements": [
-              {
-                "name": "handle",
-                "from": [7.2, 1, 7.2],
-                "to": [8.8, 6.5, 8.8],
-                "faces": {
-                  "north": {"uv": [0, 0, 4, 12], "texture": "#chain"},
-                  "east": {"uv": [0, 0, 4, 12], "texture": "#chain"},
-                  "south": {"uv": [0, 0, 4, 12], "texture": "#chain"},
-                  "west": {"uv": [0, 0, 4, 12], "texture": "#chain"},
-                  "up": {"uv": [0, 0, 4, 4], "texture": "#gold"},
-                  "down": {"uv": [0, 0, 4, 4], "texture": "#gold"}
-                }
-              },
-              {
-                "name": "omega_guard",
-                "from": [4.5, 6.2, 6.5],
-                "to": [11.5, 8.2, 9.5],
-                "faces": {
-                  "north": {"uv": [0, 0, 14, 4], "texture": "#gold"},
-                  "east": {"uv": [0, 0, 6, 4], "texture": "#gold"},
-                  "south": {"uv": [0, 0, 14, 4], "texture": "#gold"},
-                  "west": {"uv": [0, 0, 6, 4], "texture": "#gold"},
-                  "up": {"uv": [0, 0, 14, 6], "texture": "#gold"},
-                  "down": {"uv": [0, 0, 14, 6], "texture": "#gold"}
-                }
-              },
-              {
-                "name": "main_war_blade",
-                "from": [5.5, 8.0, 7.3],
-                "to": [10.8, 22.0, 8.7],
-                "faces": {
-                  "north": {"uv": [0, 0, 12, 16], "texture": "#blade"},
-                  "east": {"uv": [0, 0, 3, 16], "texture": "#gold"},
-                  "south": {"uv": [0, 0, 12, 16], "texture": "#blade"},
-                  "west": {"uv": [0, 0, 3, 16], "texture": "#blade"},
-                  "up": {"uv": [0, 0, 10, 3], "texture": "#blade"},
-                  "down": {"uv": [0, 0, 10, 3], "texture": "#gold"}
-                }
-              },
-              {
-                "name": "curved_fang_tip",
-                "from": [4.0, 17.5, 7.4],
-                "to": [11.8, 25.0, 8.6],
-                "rotation": {"angle": -22.5, "axis": "z", "origin": [8, 20, 8]},
-                "faces": {
-                  "north": {"uv": [0, 0, 14, 14], "texture": "#blade"},
-                  "east": {"uv": [0, 0, 2, 14], "texture": "#blade"},
-                  "south": {"uv": [0, 0, 14, 14], "texture": "#blade"},
-                  "west": {"uv": [0, 0, 2, 14], "texture": "#blade"},
-                  "up": {"uv": [0, 0, 14, 2], "texture": "#blade"},
-                  "down": {"uv": [0, 0, 14, 2], "texture": "#blade"}
-                }
-              },
-              {
-                "name": "blade_hook_barb",
-                "from": [3.5, 12.0, 7.4],
-                "to": [6.5, 16.0, 8.6],
-                "rotation": {"angle": 22.5, "axis": "z", "origin": [5, 14, 8]},
-                "faces": {
-                  "north": {"uv": [0, 0, 6, 8], "texture": "#gold"},
-                  "east": {"uv": [0, 0, 2, 8], "texture": "#gold"},
-                  "south": {"uv": [0, 0, 6, 8], "texture": "#gold"},
-                  "west": {"uv": [0, 0, 2, 8], "texture": "#gold"},
-                  "up": {"uv": [0, 0, 6, 2], "texture": "#gold"},
-                  "down": {"uv": [0, 0, 6, 2], "texture": "#gold"}
-                }
-              },
-              {
-                "name": "hanging_chain_1",
-                "from": [7.5, -3.5, 7.5],
-                "to": [8.5, 1.0, 8.5],
-                "rotation": {"angle": 22.5, "axis": "x", "origin": [8, 1, 8]},
-                "faces": {
-                  "north": {"uv": [0, 0, 3, 10], "texture": "#chain"},
-                  "east": {"uv": [0, 0, 3, 10], "texture": "#chain"},
-                  "south": {"uv": [0, 0, 3, 10], "texture": "#chain"},
-                  "west": {"uv": [0, 0, 3, 10], "texture": "#chain"},
-                  "up": {"uv": [0, 0, 3, 3], "texture": "#chain"},
-                  "down": {"uv": [0, 0, 3, 3], "texture": "#chain"}
-                }
-              }
-            ],
-            "display": {
-              "thirdperson_righthand": {
-                "rotation": [0, -90, 45],
-                "translation": [0, 3.5, 1.0],
-                "scale": [1.35, 1.35, 1.1]
-              },
-              "thirdperson_lefthand": {
-                "rotation": [0, 90, -45],
-                "translation": [0, 3.5, 1.0],
-                "scale": [1.35, 1.35, 1.1]
-              },
-              "firstperson_righthand": {
-                "rotation": [0, -90, 25],
-                "translation": [1.2, 2.5, 0.5],
-                "scale": [1.1, 1.1, 1.0]
-              },
-              "firstperson_lefthand": {
-                "rotation": [0, 90, -25],
-                "translation": [1.2, 2.5, 0.5],
-                "scale": [1.1, 1.1, 1.0]
-              },
-              "gui": {
-                "rotation": [25, -35, -45],
-                "translation": [0, -2.5, 0],
-                "scale": [0.72, 0.72, 0.72]
-              }
-            }
-          }
-          EOF
-
-          # ================= 2. المجسم ثلاثي الأبعاد: MEDUSA HEAD 3D =================
-          cat > src/main/resources/assets/olympus_trial/models/item/medusa_head.json <<'EOF'
-          {
-            "textures": {
-              "skin": "olympus_trial:item/medusa_scales",
-              "eyes": "olympus_trial:item/medusa_glow",
-              "particle": "olympus_trial:item/medusa_scales"
-            },
-            "elements": [
-              {
-                "name": "gorgon_head",
-                "from": [4, 4, 4],
-                "to": [12, 12, 12],
-                "faces": {
-                  "north": {"uv": [0, 0, 16, 16], "texture": "#skin"},
-                  "east": {"uv": [0, 0, 16, 16], "texture": "#skin"},
-                  "south": {"uv": [0, 0, 16, 16], "texture": "#skin"},
-                  "west": {"uv": [0, 0, 16, 16], "texture": "#skin"},
-                  "up": {"uv": [0, 0, 16, 16], "texture": "#skin"},
-                  "down": {"uv": [0, 0, 16, 16], "texture": "#skin"}
-                }
-              },
-              {
-                "name": "glowing_eyes",
-                "from": [5, 7, 3.7],
-                "to": [11, 9, 4.2],
-                "faces": {
-                  "north": {"uv": [0, 0, 12, 4], "texture": "#eyes"},
-                  "south": {"uv": [0, 0, 12, 4], "texture": "#eyes"},
-                  "up": {"uv": [0, 0, 12, 2], "texture": "#eyes"},
-                  "down": {"uv": [0, 0, 12, 2], "texture": "#eyes"}
-                }
-              },
-              {
-                "name": "snake_1",
-                "from": [3, 11, 5],
-                "to": [5, 17, 7],
-                "rotation": {"angle": 22.5, "axis": "z", "origin": [4, 11, 6]},
-                "faces": {
-                  "north": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "east": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "south": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "west": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "up": {"uv": [0, 0, 4, 4], "texture": "#eyes"}
-                }
-              },
-              {
-                "name": "snake_2",
-                "from": [11, 11, 5],
-                "to": [13, 17, 7],
-                "rotation": {"angle": -22.5, "axis": "z", "origin": [12, 11, 6]},
-                "faces": {
-                  "north": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "east": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "south": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "west": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "up": {"uv": [0, 0, 4, 4], "texture": "#eyes"}
-                }
-              },
-              {
-                "name": "snake_3",
-                "from": [7, 11, 9],
-                "to": [9, 18, 11],
-                "rotation": {"angle": -22.5, "axis": "x", "origin": [8, 11, 10]},
-                "faces": {
-                  "north": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "east": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "south": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "west": {"uv": [0, 0, 4, 12], "texture": "#skin"},
-                  "up": {"uv": [0, 0, 4, 4], "texture": "#eyes"}
-                }
-              }
-            ],
-            "display": {
-              "thirdperson_righthand": {"rotation": [10, 180, 0], "translation": [0, 2, 1], "scale": [0.9, 0.9, 0.9]},
-              "firstperson_righthand": {"rotation": [0, 160, 0], "translation": [1, 2, 0], "scale": [0.85, 0.85, 0.85]},
-              "gui": {"rotation": [25, 145, 0], "translation": [0, -1, 0], "scale": [0.85, 0.85, 0.85]}
-            }
-          }
-          EOF
-
-          # ================= 3. المجسم ثلاثي الأبعاد: BOW OF DESTINY 3D =================
-          cat > src/main/resources/assets/olympus_trial/models/item/bow_of_destiny.json <<'EOF'
-          {
-            "textures": {
-              "gold": "olympus_trial:item/greek_gold",
-              "energy": "olympus_trial:item/cronos_lightning",
-              "particle": "olympus_trial:item/greek_gold"
-            },
-            "elements": [
-              {
-                "name": "bow_grip",
-                "from": [6.5, 5, 7],
-                "to": [9.5, 11, 9],
-                "faces": {
-                  "north": {"uv": [0, 0, 6, 12], "texture": "#gold"},
-                  "east": {"uv": [0, 0, 4, 12], "texture": "#gold"},
-                  "south": {"uv": [0, 0, 6, 12], "texture": "#gold"},
-                  "west": {"uv": [0, 0, 4, 12], "texture": "#gold"}
-                }
-              },
-              {
-                "name": "upper_limb",
-                "from": [7, 10, 7],
-                "to": [9, 19, 9],
-                "rotation": {"angle": 22.5, "axis": "z", "origin": [8, 10, 8]},
-                "faces": {
-                  "north": {"uv": [0, 0, 4, 16], "texture": "#gold"},
-                  "east": {"uv": [0, 0, 4, 16], "texture": "#gold"},
-                  "south": {"uv": [0, 0, 4, 16], "texture": "#gold"},
-                  "west": {"uv": [0, 0, 4, 16], "texture": "#gold"}
-                }
-              },
-              {
-                "name": "lower_limb",
-                "from": [7, -3, 7],
-                "to": [9, 6, 9],
-                "rotation": {"angle": -22.5, "axis": "z", "origin": [8, 6, 8]},
-                "faces": {
-                  "north": {"uv": [0, 0, 4, 16], "texture": "#gold"},
-                  "east": {"uv": [0, 0, 4, 16], "texture": "#gold"},
-                  "south": {"uv": [0, 0, 4, 16], "texture": "#gold"},
-                  "west": {"uv": [0, 0, 4, 16], "texture": "#gold"}
-                }
-              },
-              {
-                "name": "laser_string",
-                "from": [10.5, -2, 7.6],
-                "to": [11.3, 18, 8.4],
-                "faces": {
-                  "north": {"uv": [0, 0, 2, 16], "texture": "#energy"},
-                  "east": {"uv": [0, 0, 2, 16], "texture": "#energy"},
-                  "south": {"uv": [0, 0, 2, 16], "texture": "#energy"},
-                  "west": {"uv": [0, 0, 2, 16], "texture": "#energy"}
-                }
-              }
-            ],
-            "display": {
-              "thirdperson_righthand": {"rotation": [0, -90, 0], "translation": [0, 2, 1], "scale": [1.2, 1.2, 1.2]},
-              "firstperson_righthand": {"rotation": [0, -90, 15], "translation": [1.5, 2, 0], "scale": [1.0, 1.0, 1.0]},
-              "gui": {"rotation": [20, -35, -35], "scale": [0.75, 0.75, 0.75]}
-            }
-          }
-          EOF
-
-          # ================= 4. المجسم ثلاثي الأبعاد: CRONOS POWER ORB 3D =================
-          cat > src/main/resources/assets/olympus_trial/models/item/cronos_power.json <<'EOF'
-          {
-            "textures": {
-              "core": "olympus_trial:item/cronos_lightning",
-              "ring": "olympus_trial:item/greek_gold",
-              "particle": "olympus_trial:item/cronos_lightning"
-            },
-            "elements": [
-              {
-                "name": "lightning_core",
-                "from": [5, 5, 5],
-                "to": [11, 11, 11],
-                "faces": {
-                  "north": {"uv": [0, 0, 12, 12], "texture": "#core"},
-                  "east": {"uv": [0, 0, 12, 12], "texture": "#core"},
-                  "south": {"uv": [0, 0, 12, 12], "texture": "#core"},
-                  "west": {"uv": [0, 0, 12, 12], "texture": "#core"},
-                  "up": {"uv": [0, 0, 12, 12], "texture": "#core"},
-                  "down": {"uv": [0, 0, 12, 12], "texture": "#core"}
-                }
-              },
-              {
-                "name": "cage_ring_1",
-                "from": [3, 7, 3],
-                "to": [13, 9, 13],
-                "rotation": {"angle": 45, "axis": "z", "origin": [8, 8, 8]},
-                "faces": {
-                  "north": {"uv": [0, 0, 16, 4], "texture": "#ring"},
-                  "east": {"uv": [0, 0, 16, 4], "texture": "#ring"},
-                  "south": {"uv": [0, 0, 16, 4], "texture": "#ring"},
-                  "west": {"uv": [0, 0, 16, 4], "texture": "#ring"}
-                }
-              },
-              {
-                "name": "cage_ring_2",
-                "from": [3, 7, 3],
-                "to": [13, 9, 13],
-                "rotation": {"angle": -45, "axis": "x", "origin": [8, 8, 8]},
-                "faces": {
-                  "north": {"uv": [0, 0, 16, 4], "texture": "#ring"},
-                  "east": {"uv": [0, 0, 16, 4], "texture": "#ring"},
-                  "south": {"uv": [0, 0, 16, 4], "texture": "#ring"},
-                  "west": {"uv": [0, 0, 16, 4], "texture": "#ring"}
-                }
-              }
-            ],
-            "display": {
-              "thirdperson_righthand": {"rotation": [20, 45, 0], "translation": [0, 2, 0], "scale": [0.9, 0.9, 0.9]},
-              "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [1, 2.5, 0], "scale": [0.85, 0.85, 0.85]},
-              "gui": {"rotation": [30, 45, 0], "scale": [0.95, 0.95, 0.95]}
-            }
-          }
-          EOF
-
-          # ================= 5. المجسم ثلاثي الأبعاد: ATLAS QUAKE GAUNTLET 3D =================
-          cat > src/main/resources/assets/olympus_trial/models/item/atlas_quake.json <<'EOF'
-          {
-            "textures": {
-              "rock": "olympus_trial:item/atlas_magma",
-              "lava": "olympus_trial:item/athena_blade",
-              "particle": "olympus_trial:item/atlas_magma"
-            },
-            "elements": [
-              {
-                "name": "titan_fist",
-                "from": [3, 3, 3],
-                "to": [13, 13, 13],
-                "faces": {
-                  "north": {"uv": [0, 0, 16, 16], "texture": "#rock"},
-                  "east": {"uv": [0, 0, 16, 16], "texture": "#rock"},
-                  "south": {"uv": [0, 0, 16, 16], "texture": "#rock"},
-                  "west": {"uv": [0, 0, 16, 16], "texture": "#rock"},
-                  "up": {"uv": [0, 0, 16, 16], "texture": "#lava"},
-                  "down": {"uv": [0, 0, 16, 16], "texture": "#rock"}
-                }
-              },
-              {
-                "name": "magma_spike_1",
-                "from": [2, 6, 6],
-                "to": [14, 10, 10],
-                "rotation": {"angle": 22.5, "axis": "y", "origin": [8, 8, 8]},
-                "faces": {
-                  "north": {"uv": [0, 0, 16, 8], "texture": "#lava"},
-                  "east": {"uv": [0, 0, 8, 8], "texture": "#lava"},
-                  "south": {"uv": [0, 0, 16, 8], "texture": "#lava"},
-                  "west": {"uv": [0, 0, 8, 8], "texture": "#lava"}
-                }
-              }
-            ],
-            "display": {
-              "thirdperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 1.5, 0], "scale": [1.1, 1.1, 1.1]},
-              "firstperson_righthand": {"rotation": [15, 45, 0], "translation": [1, 1.5, 0], "scale": [0.95, 0.95, 0.95]},
-              "gui": {"rotation": [30, 45, 0], "scale": [0.85, 0.85, 0.85]}
-            }
-          }
-          EOF
-
-          cat > src/main/resources/assets/olympus_trial/lang/en_us.json <<'EOF'
-          {
-            "item.olympus_trial.blades_of_athena": "§6§lBlades of Athena ⚔",
-            "item.olympus_trial.cronos_power": "§b§lCronos' Rage ⚡",
-            "item.olympus_trial.bow_of_destiny": "§e§lBow of Destiny 🏹",
-            "item.olympus_trial.medusa_head": "§a§lHead of Medusa 🐍",
-            "item.olympus_trial.atlas_quake": "§c§lAtlas Quake 🌋"
-          }
-          EOF
-
-      - name: Build mod JAR
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd forge_build
-          chmod +x gradlew
-          ./gradlew build --no-daemon
-
-      - name: Upload mod
-        uses: actions/upload-artifact@v4
-        with:
-          name: GodOfWar2-3D-Mod-1.20.1
-          path: forge_build/build/libs/*.jar
-          if-no-files-found: error
-```
-
----
