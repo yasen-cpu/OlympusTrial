@@ -1,0 +1,121 @@
+name: Build Olympus Trial Forge Mod
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Download Forge MDK and prepare mod
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir forge_build
+          cd forge_build
+
+          curl -fL \
+            -o forge-mdk.zip \
+            https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.2.20/forge-1.20.1-47.2.20-mdk.zip
+
+          unzip -q forge-mdk.zip
+
+          # إزالة كود المثال الموجود في Forge MDK.
+          rm -rf src/main/java/*
+
+          mkdir -p src/main/java/com/cybermod/olympustrial
+
+          cp ../OlympusTrialMod.java \
+            src/main/java/com/cybermod/olympustrial/OlympusTrialMod.java
+
+          # تغيير بيانات المود.
+          sed -i 's/^mod_id=.*/mod_id=olympus_trial/' gradle.properties
+          sed -i 's/^mod_name=.*/mod_name=Olympus Trial/' gradle.properties
+          sed -i 's/^mod_group_id=.*/mod_group_id=com.cybermod.olympustrial/' gradle.properties
+          sed -i 's/^mod_version=.*/mod_version=1.0.0/' gradle.properties
+
+          mkdir -p src/main/resources/assets/olympus_trial/models/item
+          mkdir -p src/main/resources/assets/olympus_trial/lang
+
+          # شكل مؤقت من موارد ماين كرافت.
+          cat > src/main/resources/assets/olympus_trial/models/item/blades_of_athena.json <<'EOF'
+          {
+            "parent": "minecraft:item/handheld",
+            "textures": {
+              "layer0": "minecraft:item/netherite_sword"
+            }
+          }
+          EOF
+
+          cat > src/main/resources/assets/olympus_trial/models/item/cronos_power.json <<'EOF'
+          {
+            "parent": "minecraft:item/generated",
+            "textures": {
+              "layer0": "minecraft:item/heart_of_the_sea"
+            }
+          }
+          EOF
+
+          cat > src/main/resources/assets/olympus_trial/models/item/bow_of_destiny.json <<'EOF'
+          {
+            "parent": "minecraft:item/generated",
+            "textures": {
+              "layer0": "minecraft:item/bow"
+            }
+          }
+          EOF
+
+          cat > src/main/resources/assets/olympus_trial/models/item/medusa_head.json <<'EOF'
+          {
+            "parent": "minecraft:item/generated",
+            "textures": {
+              "layer0": "minecraft:item/zombie_head"
+            }
+          }
+          EOF
+
+          cat > src/main/resources/assets/olympus_trial/models/item/atlas_quake.json <<'EOF'
+          {
+            "parent": "minecraft:item/generated",
+            "textures": {
+              "layer0": "minecraft:item/magma_cream"
+            }
+          }
+          EOF
+
+          cat > src/main/resources/assets/olympus_trial/lang/en_us.json <<'EOF'
+          {
+            "item.olympus_trial.blades_of_athena": "Blades of Athena",
+            "item.olympus_trial.cronos_power": "Cronos Power",
+            "item.olympus_trial.bow_of_destiny": "Bow of Destiny",
+            "item.olympus_trial.medusa_head": "Medusa Head",
+            "item.olympus_trial.atlas_quake": "Atlas Quake"
+          }
+          EOF
+
+      - name: Build mod JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd forge_build
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+
+      - name: Upload mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: Olympus-Trial-Forge-1.20.1
+          path: forge_build/build/libs/*.jar
+          if-no-files-found: error
